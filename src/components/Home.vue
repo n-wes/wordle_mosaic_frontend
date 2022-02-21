@@ -48,6 +48,9 @@ export default {
   overflow: hidden;
   display: inline-block;
 }
+.upload-btn-wrapper:hover {
+  cursor: pointer;
+}
 .btn {
   color: white;
   border-width: 1px;
