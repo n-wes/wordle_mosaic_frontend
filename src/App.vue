@@ -17,6 +17,10 @@ export default {
 </script>
 
 <style>
+:root {
+  --dark-gray: #121213;
+}
+
 #app {
   display: flex;
   flex-direction: column;
@@ -28,7 +32,7 @@ export default {
 }
 
 html, body {
-  background-color: #121213;
+  background-color: var(--dark-gray);
   padding: 0;
   margin: 0;
 }

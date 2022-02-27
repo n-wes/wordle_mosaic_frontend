@@ -11,17 +11,22 @@
         <button class="btn">Upload</button>
         <input type="file" ref="file" v-on:change="handleFileUpload()" accept="image/*"/>
       </div>
-      <button ref="generateBtn" id="generate-btn" class="btn">Generate</button>
+      <button ref="generateBtn" id="generate-btn" class="btn" @click="show = true">Generate</button>
     </div>
 
     <div class="preview">
       <img id="image" ref="imgComponent"/>
     </div>
+
+    <vue-final-modal v-model="show" name="example" classes="mosaic-container" content-class="mosaic-content">
+        {{ mosaic }}
+    </vue-final-modal>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+
 const file = ref(null)
 const imgComponent = ref(null)
 const generateBtn = ref(null)
@@ -40,7 +45,13 @@ export default {
   name: 'HomePage',
   components: {
     MosaicRow,
-  }
+  },
+  data() {
+    return {
+      show: true,
+      mosaic: 'My pee pee bihg'
+    }
+  },
 }
 </script>
 
@@ -97,4 +108,25 @@ img {
   max-height: 20rem;
   display: none;
 }
+>>> .mosaic-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+>>> .mosaic-content {
+  display: flex;
+  flex-direction: column;
+  align-self: center;
+  max-width: 90%;
+  margin: 0 1rem;
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.25rem;
+  background: var(--dark-gray);
+}
+.mosaic__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
 </style>
