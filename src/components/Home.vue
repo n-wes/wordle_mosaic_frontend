@@ -68,6 +68,10 @@ export default {
   overflow: hidden;
   display: inline-block;
 }
+.upload-btn-wrapper input,
+.btn {
+  cursor: pointer;
+}
 .buttons {
   display: flex;
   flex-direction: row;
