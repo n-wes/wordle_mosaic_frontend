@@ -11,7 +11,7 @@
         <button class="btn">Upload</button>
         <input type="file" ref="file" v-on:change="handleFileUpload()" accept="image/*"/>
       </div>
-      <button ref="generateBtn" id="generate-btn" class="btn" @click="show = true">Generate</button>
+      <button ref="generateBtn" id="generate-btn" class="btn" @click="generateMosaic()">Generate</button>
     </div>
 
     <div class="preview">
@@ -26,15 +26,47 @@
 
 <script setup>
 import { ref } from 'vue'
+import axios from 'axios'
 
 const file = ref(null)
 const imgComponent = ref(null)
 const generateBtn = ref(null)
+const show = ref(false)
+const mosaic = ref('')
 
 const handleFileUpload = async() => {
   const src = URL.createObjectURL(file.value.files[0])
   imgComponent.value.src = src
   imgComponent.value.style.display = generateBtn.value.style.display = "block"
+}
+
+// TODO: CONSOLIDATE THIS SOLUTION INTO
+// CURRENT CODE: https://academind.com/tutorials/vue-image-upload
+const generateMosaic = async() => {
+  let formData = new FormData()
+  const blob = new Blob([file.value.files[0]], {type: 'image'})
+  const name = file.value.files[0].name
+  formData.append('file', blob, file.value.files[0].name)
+
+  show.value = true
+  // mosaic.value = "aaaaaaa"
+
+  axios({
+    method: "post",
+    url: "https://image-to-wordle-mosaic-api.herokuapp.com/get_mosaic_for_photo",
+    data: formData,
+    headers: { 
+      "Content-Type": "multipart/form-data" 
+    },
+  })
+  .then(function (response) {
+    //handle success
+    console.log(response);
+  })
+  .catch(function (response) {
+    //handle error
+    console.log(response);
+  });
 }
 </script>
 
@@ -45,12 +77,6 @@ export default {
   name: 'HomePage',
   components: {
     MosaicRow,
-  },
-  data() {
-    return {
-      show: true,
-      mosaic: 'My pee pee bihg'
-    }
   },
 }
 </script>
