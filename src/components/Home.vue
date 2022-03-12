@@ -19,65 +19,75 @@
     </div>
 
     <vue-final-modal v-model="show" name="example" classes="mosaic-container" content-class="mosaic-content">
-        {{ mosaic }}
+      <li v-for="(row, index) in mosaicRows" v-bind:key="index" class="mosaic-row">
+        {{ row }}
+      </li>
     </vue-final-modal>
   </div>
 </template>
 
-<script setup>
-import { ref } from 'vue'
-import axios from 'axios'
-
-const file = ref(null)
-const imgComponent = ref(null)
-const generateBtn = ref(null)
-const show = ref(false)
-const mosaic = ref('')
-
-const handleFileUpload = async() => {
-  const src = URL.createObjectURL(file.value.files[0])
-  imgComponent.value.src = src
-  imgComponent.value.style.display = generateBtn.value.style.display = "block"
-}
-
-// TODO: CONSOLIDATE THIS SOLUTION INTO
-// CURRENT CODE: https://academind.com/tutorials/vue-image-upload
-const generateMosaic = async() => {
-  let formData = new FormData()
-  const blob = new Blob([file.value.files[0]], {type: 'image'})
-  const name = file.value.files[0].name
-  formData.append('file', blob, file.value.files[0].name)
-
-  show.value = true
-  // mosaic.value = "aaaaaaa"
-
-  axios({
-    method: "post",
-    url: "https://image-to-wordle-mosaic-api.herokuapp.com/get_mosaic_for_photo",
-    data: formData,
-    headers: { 
-      "Content-Type": "multipart/form-data" 
-    },
-  })
-  .then(function (response) {
-    //handle success
-    console.log(response);
-  })
-  .catch(function (response) {
-    //handle error
-    console.log(response);
-  });
-}
-</script>
-
 <script>
 import MosaicRow from './MosaicRow'
+import { ref } from 'vue'
+import axios from 'axios'
 
 export default {
   name: 'HomePage',
   components: {
     MosaicRow,
   },
+  setup() {
+    const file = ref(null)
+    const imgComponent = ref(null)
+    const generateBtn = ref(null)
+    const show = ref(false)
+    const mosaicRows = ref([])
+
+    const handleFileUpload = async() => {
+      const src = URL.createObjectURL(file.value.files[0])
+
+      imgComponent.value.src = src
+      imgComponent.value.style.display = generateBtn.value.style.display = "block"
+    }
+
+    // TODO: CONSOLIDATE THIS SOLUTION INTO
+    // CURRENT CODE: https://academind.com/tutorials/vue-image-upload
+    const generateMosaic = async() => {
+      const f = file.value.files[0]
+
+      let reader = new FileReader()
+      reader.readAsDataURL(f)
+
+      reader.onload = () => {
+        console.log(reader.result)
+        axios.post('', {
+          data: reader.result
+        })
+          .then((res) => {
+            mosaicRows.value = res.data.split('\n')
+          })
+          .catch((e) => {
+            console.log(e)
+          })
+      }
+      
+      reader.onerror = () => {
+        alert('Image upload failed! Please try again, or try another image.')
+      }
+
+      show.value = true
+    }
+
+    return {
+      file,
+      imgComponent,
+      generateBtn,
+      show,
+      mosaicRows,
+      handleFileUpload,
+      generateMosaic
+    }
+  }
 }
 </script>
 
@@ -92,6 +102,9 @@ export default {
   flex-direction: column;
   margin-bottom: 3rem;
   gap: .4rem;
+}
+.mosaic-row {
+  list-style-type: none;
 }
 .upload-btn-wrapper input[type="file"] {
   font-size: 100px;
