@@ -9,9 +9,9 @@
     <div class="buttons">
       <div class="upload-btn-wrapper">
         <button class="btn">Upload</button>
-        <input type="file" ref="file" v-on:change="handleFileUpload()" accept="image/*"/>
+        <input type="file" ref="file" @change="handleFileUpload" accept="image/*"/>
       </div>
-      <button ref="generateBtn" id="generate-btn" class="btn" @click="generateMosaic()">Generate</button>
+      <button ref="generateBtn" id="generate-btn" class="btn" @click="generateMosaic">Generate</button>
     </div>
 
     <div class="preview">
@@ -22,7 +22,12 @@
       <li v-for="(row, index) in mosaicRows" v-bind:key="index" class="mosaic-row">
         {{ row }}
       </li>
+      <button class="btn share-btn" @click="copyMosaic">SHARE</button>
     </vue-final-modal>
+
+    <div class="copy-alert" ref="copyAlert">
+      Copied to Clipboard
+    </div>
   </div>
 </template>
 
@@ -42,6 +47,8 @@ export default {
     const generateBtn = ref(null)
     const show = ref(false)
     const mosaicRows = ref([])
+    const mosaicText = ref('')
+    const copyAlert = ref('')
 
     const handleFileUpload = async() => {
       const src = URL.createObjectURL(file.value.files[0])
@@ -50,8 +57,6 @@ export default {
       imgComponent.value.style.display = generateBtn.value.style.display = "block"
     }
 
-    // TODO: CONSOLIDATE THIS SOLUTION INTO
-    // CURRENT CODE: https://academind.com/tutorials/vue-image-upload
     const generateMosaic = async() => {
       const f = file.value.files[0]
 
@@ -59,11 +64,10 @@ export default {
       reader.readAsDataURL(f)
 
       reader.onload = () => {
-        console.log(reader.result)
-        axios.post('', {
-          data: reader.result
-        })
+        const imgStr = reader.result.split(',')[1]
+        axios.post('https://image-to-wordle-mosaic-api.herokuapp.com/get_mosaic_for_photo/', {data: imgStr})
           .then((res) => {
+            mosaicText.value = res.data
             mosaicRows.value = res.data.split('\n')
           })
           .catch((e) => {
@@ -78,6 +82,17 @@ export default {
       show.value = true
     }
 
+    const copyMosaic = () => {
+      console.log(mosaicText.value)
+      navigator.clipboard.writeText(mosaicText.value)
+      showCopiedAlert()
+    }
+
+    const showCopiedAlert = async() => {
+      copyAlert.value.style.display = "block"
+      setTimeout(() => {copyAlert.value.style.display="none"}, 1000)
+    }
+
     return {
       file,
       imgComponent,
@@ -85,7 +100,9 @@ export default {
       show,
       mosaicRows,
       handleFileUpload,
-      generateMosaic
+      generateMosaic,
+      copyMosaic,
+      copyAlert
     }
   }
 }
@@ -130,14 +147,17 @@ export default {
 }
 .btn {
   color: white;
-  border-width: 1px;
-  border-radius: 2px;
-  border-style: solid;
-  background: none;
+  border-radius: 4px;
+  border-style: none;
+  background: #53834E;
   font-size: 1.5rem;
   padding: 1rem 2rem 1rem 2rem;
   font-weight: bold;
   text-transform: uppercase;
+}
+.share-btn {
+  margin-top: 1rem;
+  width: 10rem;
 }
 #generate-btn {
   display: none;
@@ -156,6 +176,7 @@ img {
   display: flex;
   flex-direction: column;
   align-self: center;
+  align-items: center;
   max-width: 90%;
   margin: 0 1rem;
   padding: 1rem;
@@ -166,6 +187,19 @@ img {
 .mosaic__title {
   font-size: 1.5rem;
   font-weight: 700;
+}
+.copy-alert {
+  background: white;
+  color: black;
+  text-transform: uppercase;
+  font-weight: bold;
+  font-size: 1.5rem;
+  padding: 1rem;
+  border-radius: 5px;
+  position: absolute;
+  z-index: 99999;
+  top: 4rem;
+  display: none
 }
 
 </style>

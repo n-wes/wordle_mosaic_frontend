@@ -19,6 +19,9 @@ export default {
 <style>
 :root {
   --dark-gray: #121213;
+  --gray: '#3A3A3C';
+  --yellow: '#B59F3B';
+  --green: '#538D4E';
 }
 
 #app {
